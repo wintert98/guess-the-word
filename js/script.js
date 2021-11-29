@@ -1,5 +1,6 @@
 const guessed = document.querySelector(".guessed-letters");
 const btnGuess = document.querySelector(".guess");
+const form = document.querySelector(".guess-form");
 const input = document.querySelector(".letter");
 const wordInProgess = document.querySelector(".word-in-progress");
 const remaining = document.querySelector(".remaining");
@@ -9,7 +10,7 @@ const btnPlayAgain = document.querySelector(".play-again");
 let playerWon = false;
 let word = "magnolia";
 let wordUpCase = word.toUpperCase();
-const guessedLetters = [];
+let guessedLetters = [];
 guessed.innerHTML = "";
 let remainingGuesses = 8;
 
@@ -23,6 +24,7 @@ const getWord = async function () {
     const randomWord = wordArray[randomIndex];
     
     word = randomWord;
+    console.log(word);
     updateText(word);
     wordUpCase = word.toUpperCase();
 }
@@ -49,6 +51,8 @@ btnGuess.addEventListener("click", function (e) {
     message.innerText = "";
     const checkedInput = checkInput(input.value);
     makeGuess(checkedInput);
+    form.reset();
+   
 });
 
 /* -------- Updates Text of word to guess with circles -------------*/
@@ -116,6 +120,7 @@ const updateRemainingGuesses = function (guess) {
    } 
    if(remainingGuesses === 0) {
       message.innerText = `Game Over! the word you were trying to guess is ${wordUpper}, try again`
+      startOver();
    }
    remainSpan.innerText = remainingGuesses + " guesses"
 };
@@ -126,8 +131,38 @@ const playerWin = function (wordGuess) {
     if (wordUpper === wordGuess) {
         message.classList.add("win")
         playerWon = true;
+        startOver();
         
 
     } 
 
 };
+
+/* -------- Reset game and start over -------------*/
+
+const startOver = function () {
+   btnGuess.classList.add("hide");
+   remaining.classList.add("hide");
+   guessed.classList.add("hide")
+   btnPlayAgain.classList.remove("hide")
+};
+
+const gameReset = function () {
+    message.innerHTML = "";
+    playerWon = false;
+    message.classList.remove("win");
+    message.classList.remove("highlight")
+    remaining.classList.remove("hide");
+    guessed.classList.remove("hide");
+    guessed.innerHTML = "";
+    remainingGuesses = 8;
+    remainSpan.innerText = remainingGuesses + " guesses"
+    btnGuess.classList.remove("hide");
+    btnPlayAgain.classList.add("hide")
+}
+
+btnPlayAgain.addEventListener("click", function (e) {
+      gameReset();
+      guessedLetters = [];
+      getWord();
+});
