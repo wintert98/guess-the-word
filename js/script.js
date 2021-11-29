@@ -6,9 +6,27 @@ const remaining = document.querySelector(".remaining");
 const remainSpan = document.querySelector(".remain");
 const message = document.querySelector(".message");
 const btnPlayAgain = document.querySelector(".play-again");
-const word = "magnolia";
+let playerWon = false;
+let word = "magnolia";
+let wordUpCase = word.toUpperCase();
 const guessedLetters = [];
 guessed.innerHTML = "";
+let remainingGuesses = 8;
+
+/* -------- Async fetch word function -------------*/
+
+const getWord = async function () {
+    const res = await fetch(`https://gist.githubusercontent.com/skillcrush-curriculum/7061f1d4d3d5bfe47efbfbcfe42bf57e/raw/5ffc447694486e7dea686f34a6c085ae371b43fe/words.txt`);
+    const data = await res.text();
+    const wordArray = data.split("\n");
+    const randomIndex = Math.floor(Math.random() * wordArray.length)
+    const randomWord = wordArray[randomIndex];
+    
+    word = randomWord;
+    updateText(word);
+    wordUpCase = word.toUpperCase();
+}
+getWord();
 
 /* -------- Updates Text of word to guess with circles -------------*/
 
@@ -28,7 +46,6 @@ updateText(word);
 
 btnGuess.addEventListener("click", function (e) {
     e.preventDefault();
-    console.log(input.value);
     message.innerText = "";
     const checkedInput = checkInput(input.value);
     makeGuess(checkedInput);
@@ -56,6 +73,7 @@ const makeGuess = function (letter) {
      guessedLetters.push(guess);
      showGuess(guess);
      updateWordInProgress(guessedLetters);
+     updateRemainingGuesses(guess);
  }
 };
 
@@ -74,7 +92,6 @@ const updateWordInProgress = function (array) {
   const wordArray = wordUpper.split("");
   let newWordArray = [];
   for (let letter of wordArray) {
-      console.log(letter);
       if (array.includes(letter)) {
           newWordArray.push(letter);
       } else {
@@ -83,16 +100,33 @@ const updateWordInProgress = function (array) {
   }
   let joined = newWordArray.join("")
   wordInProgess.innerText = joined;
-  console.log(joined);
   playerWin(joined)
+};
+
+/* -------- Updates remaining guesses function -------------*/
+const updateRemainingGuesses = function (guess) {
+    const wordUpper = word.toUpperCase();
+   if (!wordUpper.includes(guess)) {
+       message.innerText = "The word does not include that letter, try again"
+       remainingGuesses -= 1;
+   } else if (playerWon) {
+       message.innerHTML =  `<p class="highlight">You guessed correct the word! Congrats you win!</p>`
+   } else if (wordUpper.includes(guess)) {
+       message.innerText = "The word does include that letter, Nice Work!"
+   } 
+   if(remainingGuesses === 0) {
+      message.innerText = `Game Over! the word you were trying to guess is ${wordUpper}, try again`
+   }
+   remainSpan.innerText = remainingGuesses + " guesses"
 };
 
 /* -------- Checks if player has won the game -------------*/
 const playerWin = function (wordGuess) {
-    const wordUpCase = word.toUpperCase();
-    if (wordUpCase === wordGuess) {
+    const wordUpper = word.toUpperCase();
+    if (wordUpper === wordGuess) {
         message.classList.add("win")
-        message.innerHTML =  `<p class="highlight">You guessed correct the word! Congrats!</p>`
+        playerWon = true;
+        
 
     } 
 
